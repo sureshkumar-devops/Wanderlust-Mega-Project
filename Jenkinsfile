@@ -28,24 +28,8 @@ pipeline {
                 }
             }
         }
-        
-        stage('Git: Code Checkout') {
-            steps {
-                script{
-                    code_checkout("https://github.com/LondheShubham153/Wanderlust-Mega-Project.git","main")
-                }
-            }
-        }
-        
-        stage("Trivy: Filesystem scan"){
-            steps{
-                script{
-                    trivy_scan()
-                }
-            }
-        }
-
-        stage("OWASP: Dependency check"){
+           
+       stage('Git: CheckOut'){
             steps{
                 script{
                     owasp_dependency()
