@@ -94,7 +94,9 @@ pipeline {
                 expression { shouldRun('Git: Code CheckOut') }
             }
             steps {
-                echo "Git Code Checkout"
+                script{
+                    git_checkout('https://github.com/sureshkumar-devops/Wanderlust-Mega-Project.git', 'main')
+                }
             }
         }
 
@@ -103,7 +105,10 @@ pipeline {
                 expression { shouldRun('GitLeaks: Check HardCode Pass') }
             }
             steps {
-                echo "GitLeaks Check"
+                script{
+                    //sh 'gitleaks detect --source . -r gitleaks-report.json -f json'    
+                    echo "Git Leaks"
+                }
             }
         }
 
@@ -111,8 +116,10 @@ pipeline {
             when {
                 expression { shouldRun('Trivy: File System Scan') }
             }
-            steps {
-                echo "Trivy Scan"
+            steps{
+                script{
+                    trivy_fscan()
+                }
             }
         }
 
@@ -120,8 +127,10 @@ pipeline {
             when {
                 expression { shouldRun('OWASP: Dependency Check') }
             }
-            steps {
-                echo "OWASP Dependency Check"
+            steps{
+                script{
+                    owasp_dependency()
+                }
             }
         }
 
@@ -130,7 +139,9 @@ pipeline {
                 expression { shouldRun('SonarQube: Code Analysis') }
             }
             steps {
-                echo "SonarQube Code Analysis"
+                script{
+                   sonarqube_analysis("SonarQube-Server", "wanderlust", "wanderlust")
+                }
             }
         }
 
@@ -139,7 +150,9 @@ pipeline {
                 expression { shouldRun('SonarQube: Code Quality Gates') }
             }
             steps {
-                echo "SonarQube Quality Gate Check"
+                script{
+                  sonarqube_code_quality()
+                }
             }
         }
 
@@ -170,7 +183,14 @@ pipeline {
                 expression { shouldRun('Docker: Build Image') }
             }
             steps {
-                echo "Docker Build Image"
+                script{
+                    dir('backend'){
+                        docker_build("wanderlust-backend-beta","${params.BACKEND_DOCKER_TAG}", "lehardocker")
+                    }
+                    dir('frontend'){
+                        docker_build("wanderlust-frontend-beta","${params.FRONTEND_DOCKER_TAG}", "lehardocker")
+                    }
+                }
             }
         }
 
@@ -178,8 +198,11 @@ pipeline {
             when {
                 expression { shouldRun('Docker: Push to DockerHub') }
             }
-            steps {
-                echo "Docker Push to DockerHub"
+            steps{
+                 script{
+                 docker_push("wanderlust-backend-beta","${params.BACKEND_DOCKER_TAG}","lehardocker")
+                 docker_push("wanderlust-frontend-beta","${params.FRONTEND_DOCKER_TAG}","lehardocker")                  
+                }
             }
         }
     }
@@ -204,7 +227,7 @@ pipeline {
             }
         }
         failure {
-           echo "Pipeline failed.."
+           echo "Pipeline failed."
         }
     }
 }
