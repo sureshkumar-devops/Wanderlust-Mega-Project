@@ -1,85 +1,89 @@
-@Library('Shared') _
-pipeline {
-    agent {label 'Node'}
-    
-    parameters {
-        string(name: 'FRONTEND_DOCKER_TAG', defaultValue: '', description: 'Frontend Docker tag of the image built by the CI job')
-        string(name: 'BACKEND_DOCKER_TAG', defaultValue: '', description: 'Backend Docker tag of the image built by the CI job')
-    }
+@Library('shared') _
+pipeline{
+agent any
+parameters{
+   string(name: 'FRONTEND_DOCKER_TAG', defaultValue: '', description: 'Frontend Docker tag of the image built by the CI job')
+   string(name: 'BACKEND_DOCKER_TAG', defaultValue: '', description: 'Backend Docker tag of the image built by the CI job')
+}
 
-    stages {
-        stage("Workspace cleanup"){
-            steps{
-                script{
-                    cleanWs()
-                }
+ stages
+ {
+  stage("Clean Workspace"){
+     steps{
+        script{
+	      cleanWs()	
+        }  
+      } 
+  }  
+
+  stage("Git: Code Checkout"){
+     steps{
+        script{     	 
+         git_checkout('https://github.com/sureshkumar-devops/Wanderlust-Mega-Project.git', 'main')	
+        }  
+      } 
+  }  
+
+  stage("Verify: Docker Image Tags"){
+     steps{
+        script{
+	       echo "FRONTEND_DOCKER_TAG: ${params.FRONTEND_DOCKER_TAG}"
+	       echo "BACKEND_DOCKER_TAG: ${params.BACKEND_DOCKER_TAG}"	
+        }  
+     } 
+   }
+   
+   stage("Update: k8s manifests"){
+      steps{
+        script{
+	       dir("kubernetes"){
+              def imagebackendtag = "${params.BACKEND_DOCKER_TAG}"
+              updateImageTag('backend.yaml', 'wanderlust-backend-beta', imagebackendtag)
+               //sh """ sed -i -e s/wanderlust-backend-beta.*/wanderlust-backend-beta:${params.BACKEND_DOCKER_TAG}/g backend.yaml """
+              
+	       }
+	       dir("kubernetes"){
+               def imagefrontendtag="${params.FRONTEND_DOCKER_TAG}"
+               updateImageTag('frontend.yaml', 'wanderlust-frontend-beta', imagefrontendtag)
+               //sh """ sed -i -e s/wanderlust-frontend-beta.*/wanderlust-frontend-beta:${params.FRONTEND_DOCKER_TAG}/g frontend.yaml """
+               }
             }
         }
-        
-        stage('Git: Code Checkout') {
-            steps {
-                script{
-                    code_checkout("https://github.com/LondheShubham153/Wanderlust-Mega-Project.git","main")
-                }
-            }
-        }
-        
-        stage('Verify: Docker Image Tags') {
-            steps {
-                script{
-                    echo "FRONTEND_DOCKER_TAG: ${params.FRONTEND_DOCKER_TAG}"
-                    echo "BACKEND_DOCKER_TAG: ${params.BACKEND_DOCKER_TAG}"
-                }
-            }
-        }
-        
-        
-        stage("Update: Kubernetes manifests"){
-            steps{
-                script{
-                    dir('kubernetes'){
-                        sh """
-                            sed -i -e s/wanderlust-backend-beta.*/wanderlust-backend-beta:${params.BACKEND_DOCKER_TAG}/g backend.yaml
-                        """
-                    }
-                    
-                    dir('kubernetes'){
-                        sh """
-                            sed -i -e s/wanderlust-frontend-beta.*/wanderlust-frontend-beta:${params.FRONTEND_DOCKER_TAG}/g frontend.yaml
-                        """
-                    }
-                    
-                }
-            }
-        }
-        
-        stage("Git: Code update and push to GitHub"){
-            steps{
-                script{
-                    withCredentials([gitUsernamePassword(credentialsId: 'Github-cred', gitToolName: 'Default')]) {
-                        sh '''
+    }
+    
+    stage("Git: Code update and push to GitHub"){
+        steps 
+        {
+            script 
+            {
+                withCredentials([usernamePassword(credentialsId: 'GitHub-Cred-Token', usernameVariable: 'GIT_USER', passwordVariable: 'GIT_PASS')]) 
+                {
+                    sh '''
+                        git config --global user.email "suresh.ak47@gmail.com"
+                        git config --global user.name "$GIT_USER"
+
                         echo "Checking repository status: "
                         git status
-                    
+
                         echo "Adding changes to git: "
                         git add .
-                        
-                        echo "Commiting changes: "
-                        git commit -m "Updated environment variables"
-                        
-                        echo "Pushing changes to github: "
-                        git push https://github.com/LondheShubham153/Wanderlust-Mega-Project.git main
+
+                        echo "Committing changes: "
+                        git commit -m "Updated environment variables" || echo "No changes to commit"
+
+                        echo "Pushing changes to GitHub: "
+                        git push https://$GIT_USER:$GIT_PASS@github.com/sureshkumar-devops/Wanderlust-Mega-Project.git main
                     '''
-                    }
                 }
             }
         }
     }
-  post {
+ }
+ post {
         success {
             script {
                 emailext attachLog: true,
-                from: 'trainwithshubham@gmail.com',
+                from: 'suresh.ak47@gmail.com',
                 subject: "Wanderlust Application has been updated and deployed - '${currentBuild.result}'",
                 body: """
                     <html>
@@ -96,14 +100,14 @@ pipeline {
                     </body>
                     </html>
             """,
-            to: 'trainwithshubham@gmail.com',
+            to: 'suresh.ak47@gmail.com',
             mimeType: 'text/html'
             }
         }
       failure {
             script {
                 emailext attachLog: true,
-                from: 'trainwithshubham@gmail.com',
+                from: 'suresh.ak47@gmail.com',
                 subject: "Wanderlust Application build failed - '${currentBuild.result}'",
                 body: """
                     <html>
@@ -117,7 +121,7 @@ pipeline {
                     </body>
                     </html>
             """,
-            to: 'trainwithshubham@gmail.com',
+            to: 'suresh.ak47@gmail.com',
             mimeType: 'text/html'
             }
         }
