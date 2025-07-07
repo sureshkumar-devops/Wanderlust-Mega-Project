@@ -184,27 +184,27 @@ pipeline {
         }
     }
 
-    post {
+   post {
         success {
             script {
-                if (params.START_FROM_STAGE == 'ALL') {
-                    archiveArtifacts artifacts: '*.xml', followSymlinks: false
-                    build job: "Wanderlust-CD", parameters: [
-                        string(name: 'FRONTEND_DOCKER_TAG', value: "${params.FRONTEND_DOCKER_TAG}"),
-                        string(name: 'BACKEND_DOCKER_TAG', value: "${params.BACKEND_DOCKER_TAG}")
-                    ]
-                } else {
-                    echo "CD not triggered. Partial execution from: ${params.START_FROM_STAGE}"
-                }
+                archiveArtifacts artifacts: '*.xml', followSymlinks: false
+                build job: "Wanderlust-CD", parameters: [
+                  string(name: 'FRONTEND_DOCKER_TAG', value: "${params.FRONTEND_DOCKER_TAG}"),
+                  string(name: 'BACKEND_DOCKER_TAG', value: "${params.BACKEND_DOCKER_TAG}")
+                ]
             }
         }
-
         unstable {
-            echo "Pipeline is unstable."
+            script {
+            archiveArtifacts artifacts: '*.xml', followSymlinks: false
+            build job: "Wanderlust-CD", parameters: [
+                string(name: 'FRONTEND_DOCKER_TAG', value: "${params.FRONTEND_DOCKER_TAG}"),
+                string(name: 'BACKEND_DOCKER_TAG', value: "${params.BACKEND_DOCKER_TAG}")
+                ]
+            }
         }
-
         failure {
-            echo "Pipeline failed."
+           echo "Pipeline failed."
         }
     }
 }
