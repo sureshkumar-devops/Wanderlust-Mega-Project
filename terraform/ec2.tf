@@ -1,6 +1,6 @@
 resource "aws_key_pair" "deployer" {
   key_name   = "terra-automate-key"
-  public_key = file("/Users/shubham/Documents/work/TrainWithShubham/terra-practice/terra-key.pub")
+  public_key = file("/opt/projects/Wanderlust-Mega-Project/terraform/terra-key.pub")
 }
 
 resource "aws_default_vpc" "default" {
@@ -43,6 +43,14 @@ resource "aws_security_group" "allow_user_to_connect" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
+  ingress {
+    description = "port for application"
+    from_port = 3000
+    to_port = 10000
+    protocol = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
   tags = {
     Name = "mysecurity"
   }
@@ -57,7 +65,7 @@ resource "aws_instance" "testinstance" {
     Name = "Automate"
   }
   root_block_device {
-    volume_size = 30 
+    volume_size = 8 
     volume_type = "gp3"
   }
 }
