@@ -21,7 +21,7 @@ pipeline{
             }
             steps{
                 script{
-                    if(params.FRONTEND_DOCKER_TAG == "" | params.BACKEND_DOCKER_TAG == "")
+                    if(params.FRONTEND_DOCKER_TAG == "" | params.BACKEND_DOCKER_TAG == "" | params.START_FROM_STAGE == "")
                     {
                         error("FRONTEND_DOCKER_TAG and BACKEND_DOCKER_TAG must be provided.")
                     }
