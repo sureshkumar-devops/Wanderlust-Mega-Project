@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 git rm --cached -r *.tf *.tfvars .terraform
+=======
+git rm --cached -r *.tf *.tfvars .terraform 
+>>>>>>> c5590b0 (changed .gitignore file)
 # Exclude these from module packaging
 *.tfstate
 *.tfstate.*
