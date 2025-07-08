@@ -18,7 +18,7 @@ spec:
     spec:
       containers:
         - name: backend
-          image: lehardocker/wanderlust-backend-beta:v1
+          image: lehardocker/wanderlust-backend-beta:v6
           ports:
             - containerPort: 8080
 ---
