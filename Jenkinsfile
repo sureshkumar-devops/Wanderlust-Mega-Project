@@ -205,6 +205,7 @@ pipeline {
                 }
             }
         }
+<<<<<<< HEAD
     }
 
    post {
@@ -231,3 +232,31 @@ pipeline {
         }
     }
 }
+=======
+    }
+
+   post {
+        success {
+            script {
+                archiveArtifacts artifacts: '*.xml', followSymlinks: false
+                build job: "Wanderlust-CD", parameters: [
+                  string(name: 'FRONTEND_DOCKER_TAG', value: "${params.FRONTEND_DOCKER_TAG}"),
+                  string(name: 'BACKEND_DOCKER_TAG', value: "${params.BACKEND_DOCKER_TAG}")
+                ]
+            }
+        }
+        unstable {
+            script {
+            archiveArtifacts artifacts: '*.xml', followSymlinks: false
+            build job: "Wanderlust-CD", parameters: [
+                string(name: 'FRONTEND_DOCKER_TAG', value: "${params.FRONTEND_DOCKER_TAG}"),
+                string(name: 'BACKEND_DOCKER_TAG', value: "${params.BACKEND_DOCKER_TAG}")
+                ]
+            }
+        }
+        failure {
+           echo "Pipeline failed."
+        }
+    }
+}
+>>>>>>> 723ef0e (added terraform ignore file)
