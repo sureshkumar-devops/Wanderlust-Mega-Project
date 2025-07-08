@@ -43,15 +43,7 @@ resource "aws_security_group" "allow_user_to_connect" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  ingress {
-    description = "port for application"
-    from_port = 3000
-    to_port = 10000
-    protocol = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  tags = {
+   tags = {
     Name = "mysecurity"
   }
 }
