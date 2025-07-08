@@ -22,7 +22,7 @@ WORKDIR /app
 # copy the above stage as compressed
 COPY --from=backend-builder /app .
 
-COPY --from=backend-builder /backend/.env.docker /app/.env
+COPY backend/.env.docker /app/.env
 # Port
 EXPOSE 8080
 
