@@ -18,7 +18,7 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: lehardocker/wanderlust-frontend-beta:v8
+          image: lehardocker/wanderlust-frontend-beta:latest
           ports:
             - containerPort: 5173
 ---
