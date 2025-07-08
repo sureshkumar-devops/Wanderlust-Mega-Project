@@ -15,4 +15,4 @@ git rm --cached -r *.tf *.tfvars .terraform
 .DS_Store
 terra-key
 terra-key.pub
-terraform/.terraform.tfstate.lock.hcl
+terraform/.terraform.lock.hcl
